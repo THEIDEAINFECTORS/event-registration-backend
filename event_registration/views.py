@@ -17,44 +17,55 @@ User = get_user_model()
 class SendOTP(APIView):
 
     def post(self, request):
-        # Use the serializer to validate the input
-        serializer = SendOTPSerializer(data=request.data)
-        if serializer.is_valid():
-            mobile_number = serializer.validated_data['mobile']
-            
-            # Check if user exists, else create a new user
-            user, created = User.objects.get_or_create(mobile=mobile_number)
+        try:
 
-            # Generate OTP (assuming you have a method for this)
-            otp = generate_otp()
+            # Use the serializer to validate the input
+            serializer = SendOTPSerializer(data=request.data)
+            if serializer.is_valid():
+                mobile_number = serializer.validated_data['mobile']
+                
+                # Check if user exists, else create a new user
+                user, created = User.objects.get_or_create(mobile=mobile_number)
 
-            # Calculate OTP expiration time (e.g., 10 minutes from now)
-            expires_at = timezone.now() + timedelta(minutes=10)
+                # Generate OTP (assuming you have a method for this)
+                otp = generate_otp()
 
-            # Save OTP in the OTP model
-            OTP.objects.create(user=user, otp=otp, created_at=timezone.now(), exprires_at=expires_at, active=True)
+                # Calculate OTP expiration time (e.g., 10 minutes from now)
+                expires_at = timezone.now() + timedelta(minutes=10)
 
-            # Create Twilio client
-            client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+                # Save OTP in the OTP model
+                OTP.objects.create(user=user, otp=otp, created_at=timezone.now(), exprires_at=expires_at, active=True)
 
-            # Send OTP message
-            message = client.messages.create(
-                body=f'Registration OTP for Formis Hydrovibe - {otp}',
-                from_=TWILIO_PHONE_NUMBER,
-                to=f'+91{mobile_number}',  # Add +91 back to the sanitized mobile number
-            )
+                # Create Twilio client
+                client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
 
-            data = {
-                'user': {
-                    'mobile': user.mobile,
-                    'is_new_user': created,
-                },
-                'Message': message.body
-            }
+                # Send OTP message
+                message = client.messages.create(
+                    body=f'Your Formis Hydrovibe code is {otp}',
+                    from_=TWILIO_PHONE_NUMBER,
+                    to=f'+91{mobile_number}',  
+                )
 
-            return Response(data, status=status.HTTP_200_OK)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                data = {
+                    'user': {
+                        'mobile': user.mobile,
+                        'is_new_user': created,
+                    },
+                    'Message': 'OTP sent successfully'
+                }
+
+                return Response(data, status=status.HTTP_200_OK)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except ValueError as e:
+            # Handle any ValueErrors that could occur (e.g., invalid data in query params)
+            print(f"Value error: {e}")
+            return Response({'error': 'Invalid request'}, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            # Log any unexpected exceptions and return a generic error response
+            print(f"An unexpected error occurred: {e}")
+            return Response({'error': 'Something went wrong. Please try again later.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 class VerifyOTP(APIView):
 
