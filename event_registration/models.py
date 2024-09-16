@@ -54,7 +54,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = CustomUserManager()
 
     USERNAME_FIELD = 'mobile'
-    REQUIRED_FIELDS = []  # Specify other required fields here
+    REQUIRED_FIELDS = []  
 
     def __str__(self):
         return self.mobile
