@@ -16,6 +16,9 @@ import uuid
 import razorpay
 import datetime
 from django.shortcuts import redirect
+import qrcode
+import base64
+from io import BytesIO
 
 User = get_user_model()
 
@@ -83,8 +86,46 @@ class VerifyOTP(APIView):
                     if otp_record.exprires_at >= timezone.now():
                         otp_record.active = False
                         otp_record.save()
+
+
+                        event_booking = EventBooking.objects.filter(user=user, payment_completed=True).first()
+
+                        if event_booking:
+                            qr_data = {
+                                    'payment_completed': True,
+                                    'event_id': event_booking.event.id,
+                                    'user': event_booking.user.mobile,
+                                    'ticket': event_booking.ticket.name,
+                                    'ticket_quantity': event_booking.ticket_quantity,
+                                    'attending_time': event_booking.attending_time,
+                                    'cab_facility_required': event_booking.cab_facility_required,
+                                    'payment_completed': event_booking.payment_completed,
+                                    'reference_id': event_booking.formis_payment_id
+                                }
+
+                            qr = qrcode.QRCode(
+                                version=1,
+                                error_correction=qrcode.constants.ERROR_CORRECT_L,
+                                box_size=10,
+                                border=4,
+                            )
+                            qr.add_data(qr_data)
+                            qr.make(fit=True)
+
+                            img = qr.make_image(fill='black', back_color='white')
+
+                            # Save the image to a BytesIO object
+                            buffer = BytesIO()
+                            img.save(buffer, format="PNG")
+                            buffer.seek(0)
+
+                            # Encode the image to base64
+                            img_str = base64.b64encode(buffer.getvalue()).decode('utf-8')
+
+                            return Response({"message": "OTP verified successfully!", "ticket": img_str}, status=status.HTTP_200_OK)
+
                         
-                        return Response({"message": "OTP verified successfully!"}, status=status.HTTP_200_OK)
+                        return Response({"message": "OTP verified successfully!", "ticket": None}, status=status.HTTP_200_OK)
                     else:
                         return Response({"error": "OTP has expired."}, status=status.HTTP_400_BAD_REQUEST)
                 else:
@@ -320,16 +361,51 @@ class CheckPaymentStatus(APIView):
 
             event_booking = EventBooking.objects.filter(formis_payment_id = reference_id).first()
 
-            if event_booking.payment_completed:
+            
 
+            qr_data = {
+                    'payment_completed': True,
+                    'event_id': event_booking.event.id,
+                    'user': event_booking.user.mobile,
+                    'ticket': event_booking.ticket.name,
+                    'ticket_quantity': event_booking.ticket_quantity,
+                    'attending_time': event_booking.attending_time,
+                    'cab_facility_required': event_booking.cab_facility_required,
+                    'payment_completed': event_booking.payment_completed,
+                    'reference_id': event_booking.formis_payment_id
+                }
+
+            qr = qrcode.QRCode(
+                version=1,
+                error_correction=qrcode.constants.ERROR_CORRECT_L,
+                box_size=10,
+                border=4,
+            )
+            qr.add_data(qr_data)
+            qr.make(fit=True)
+
+            # Create an image from the QR code
+            img = qr.make_image(fill='black', back_color='white')
+
+            # Save the image to a BytesIO object
+            buffer = BytesIO()
+            img.save(buffer, format="PNG")
+            buffer.seek(0)
+
+            # Encode the image to base64
+            img_str = base64.b64encode(buffer.getvalue()).decode('utf-8')
+
+            if event_booking.payment_completed:
                 data = {
-                    'payment_completed': True
+                    'payment_completed': True,
+                    'ticket': img_str
                 }
 
             else:
 
                 data = {
-                    'payment_completed': False
+                    'payment_completed': False,
+                    'ticket': img_str
                 }
 
             return Response(data=data, status=status.HTTP_200_OK)
