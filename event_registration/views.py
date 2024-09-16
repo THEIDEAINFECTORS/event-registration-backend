@@ -193,6 +193,9 @@ class CreateProfileAndBookingView(APIView):
             reference_id = str(uuid.uuid4())
 
             try:
+                scheme = request.scheme
+                host = request.get_host()
+                full_url = f"{scheme}://{host}"
                 razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY, RAZORPAY_SECRET))
                 payment_details = razorpay_client.payment_link.create({
                                 "amount": ticket_amount * 100,
@@ -210,7 +213,7 @@ class CreateProfileAndBookingView(APIView):
                                     "event_name": "Hydrovide 2024"
                                 },
                                 "reference_id": reference_id,
-                                "callback_url": "http://localhost:8000/event-registration/callback-for-razorpay",
+                                "callback_url": f"{full_url}/event-registration/callback-for-razorpay",
                                 "callback_method": "get"
                                 })
             except razorpay.errors.RazorpayError as e:
