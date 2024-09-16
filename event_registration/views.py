@@ -195,7 +195,7 @@ class CreateProfileAndBookingView(APIView):
             try:
                 razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY, RAZORPAY_SECRET))
                 payment_details = razorpay_client.payment_link.create({
-                                "amount": 100,
+                                "amount": ticket_amount * 100,
                                 "currency": "INR",
                                 "description": "For Hydrovibe 2024",
                                 "customer": {
