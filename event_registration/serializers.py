@@ -63,21 +63,26 @@ class ProfileSerializer(serializers.ModelSerializer):
         return value
 
 class EventBookingSerializer(serializers.ModelSerializer):
+    # Make payment_link and payment_amount optional
+    payment_link = serializers.CharField(required=False)
+    payment_amount = serializers.DecimalField(required=False)
+
     class Meta:
         model = EventBooking
-        fields = ['event', 'ticket', 'ticket_quantity', 'attending_time', 'cab_facility_required', 'location', 'address', 'payment_completed', 'payment_completed_at', 'payment_link', 'payment_amount']
+        fields = [
+            'event', 'ticket', 'ticket_quantity', 'attending_time', 'cab_facility_required', 
+            'location', 'address', 'payment_completed', 'payment_completed_at', 'payment_link', 'payment_amount'
+        ]
 
     def validate(self, data):
         """
         Ensure ticket quantity is available before saving the booking.
         """
-        # Retrieve the ticket ID from the data
         ticket = data.get('ticket')
         ticket_quantity = data.get('ticket_quantity')
 
         if ticket is not None:
             try:
-                # Fetch the ticket object
                 if ticket_quantity > ticket.total_tickets_available:
                     raise serializers.ValidationError(f"Only {ticket.total_tickets_available} tickets are available.")
             except Ticket.DoesNotExist:
