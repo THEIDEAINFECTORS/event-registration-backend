@@ -392,6 +392,7 @@ class CreateProfileAndBookingView(APIView):
                                 "callback_method": "get"
                                 })
             except Exception as e:
+                print('Exception in creating payment link : ', e)
                 return Response({'error': 'Failed to create payment link'}, status=status.HTTP_502_BAD_GATEWAY)
 
             # Save EventBooking
