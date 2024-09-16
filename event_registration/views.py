@@ -351,21 +351,25 @@ class CreateProfileAndBookingView(APIView):
                 'address': request.data.get('address', '')
             }
 
+            print('Profile serializer...')
+
             # Validate and save Profile
             profile_serializer = ProfileSerializer(data=profile_data)
             profile_serializer.is_valid(raise_exception=True)
-
+            print('Profile serializer done...')
             # No need to fetch user from the database using mobile number, as user is already available
             profile, created = Profile.objects.get_or_create(user=user, defaults=profile_serializer.validated_data)
-
+            print('Profile serializer created...')
             # Validate and save EventBooking
+            print('booking serializer...')
             booking_serializer = EventBookingSerializer(data=booking_data)
             booking_serializer.is_valid(raise_exception=True)
+            print('Profile serializer done...')
 
             ticket_price = booking_serializer.validated_data['ticket'].price
             ticket_quantity = booking_serializer.validated_data['ticket_quantity']
             ticket_amount = ticket_price * ticket_quantity
-
+            print('Ticket amount...')
             reference_id = str(uuid.uuid4())
 
             # Create payment link
