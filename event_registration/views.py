@@ -391,7 +391,7 @@ class CreateProfileAndBookingView(APIView):
                                 "callback_url": f"{full_url}/event-registration/callback-for-razorpay",
                                 "callback_method": "get"
                                 })
-            except razorpay.errors.RazorpayError as e:
+            except Exception as e:
                 return Response({'error': 'Failed to create payment link'}, status=status.HTTP_502_BAD_GATEWAY)
 
             # Save EventBooking
