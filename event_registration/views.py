@@ -331,6 +331,8 @@ class CreateProfileAndBookingView(APIView):
         try:
             user = request.user  # Fetch the user from the token
 
+            print('------------ request data ----------- ', request.data)
+
             profile_data = {
                 'name': request.data.get('name'),
                 'age': request.data.get('age'),
