@@ -65,7 +65,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 class EventBookingSerializer(serializers.ModelSerializer):
     class Meta:
         model = EventBooking
-        fields = ['event', 'ticket', 'ticket_quantity', 'attending_time', 'cab_facility_required', 'location', 'address']
+        fields = ['event', 'ticket', 'ticket_quantity', 'attending_time', 'cab_facility_required', 'location', 'address', 'payment_completed', 'payment_completed_at', 'payment_link', 'payment_amount']
 
     def validate(self, data):
         """
