@@ -363,7 +363,14 @@ class CreateProfileAndBookingView(APIView):
             # Validate and save EventBooking
             print('booking serializer...')
             booking_serializer = EventBookingSerializer(data=booking_data)
-            booking_serializer.is_valid(raise_exception=True)
+            
+            try:
+                booking_serializer.is_valid(raise_exception=True)
+            except ValidationError as e:
+                # Print the exception message
+                print("Validation Error:", e)
+                # Optionally, you can print the detailed error dictionary
+                print("Detailed Error:", e.detail)
             print('Profile serializer done...')
 
             ticket_price = booking_serializer.validated_data['ticket'].price
