@@ -130,9 +130,9 @@ class EventBooking(models.Model):
         ('8PM-12PM', '8PM-12PM')
     )
 
-    event = models.OneToOneField(Event, on_delete=models.CASCADE, null=False)
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, null=False)
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=False)
-    ticket = models.OneToOneField(Ticket, on_delete=models.CASCADE, null=False)
+    ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE, null=False)
     ticket_quantity = models.PositiveIntegerField(null=False)
     attending_time = models.CharField(choices=ATTENDING_TIME, null=False, max_length=10)
     cab_facility_required = models.BooleanField(default=False)
