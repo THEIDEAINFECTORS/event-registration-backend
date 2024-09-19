@@ -349,8 +349,8 @@ class CreateProfileAndBookingView(APIView):
                 'ticket_quantity': request.data.get('ticket_quantity'),
                 'attending_time': request.data.get('attending_time'),
                 'cab_facility_required': request.data.get('cab_facility_required', False),
-                'location': request.data.get('location', ''),
-                'address': request.data.get('address', '')
+                'location': request.data.get('location'),
+                'address': request.data.get('address')
             }
 
             print('Profile serializer...')
