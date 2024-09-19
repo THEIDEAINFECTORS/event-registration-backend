@@ -66,6 +66,9 @@ class EventBookingSerializer(serializers.ModelSerializer):
     # Make payment_link and payment_amount optional
     payment_link = serializers.URLField(required=False)
     payment_amount = serializers.FloatField(required=False)
+    location = serializers.CharField(required=False)
+    cab_facility_required = serializers.BooleanField(required=False)
+    address = serializers.CharField(required=False)
 
     class Meta:
         model = EventBooking
