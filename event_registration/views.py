@@ -46,7 +46,7 @@ class SendOTP(APIView):
                 client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
 
                 message = client.messages.create(
-                    body=f'Your Formis Hydrovibe code is {otp}',
+                    body=f'Your Kitsa Hydrovibe 2024 code is {otp}',
                     from_=TWILIO_PHONE_NUMBER,
                     to=f'+91{mobile_number}',  
                 )
