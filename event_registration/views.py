@@ -200,130 +200,6 @@ class LatestActiveEventView(APIView):
             print(f"An unexpected error occurred: {e}")
             return Response({'error': 'Something went wrong. Please try again later.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-# class CreateProfileAndBookingView(APIView):
-
-#     permission_classes = [IsAuthenticated]
-    
-#     @transaction.atomic
-#     def post(self, request):
-#         try:
-            
-#             profile_data = {
-#                 'name': request.data.get('name'),
-#                 'age': request.data.get('age'),
-#                 'mobile': request.data.get('mobile'),
-#                 'email': request.data.get('email'),
-#                 'gender': request.data.get('gender')
-#             }
-
-#             booking_data = {
-#                 'event': request.data.get('event'), 
-#                 'ticket': request.data.get('ticket'),  
-#                 'ticket_quantity': request.data.get('ticket_quantity'),
-#                 'attending_time': request.data.get('attending_time'),
-#                 'cab_facility_required': request.data.get('cab_facility_required', False),
-#                 'location': request.data.get('location', ''),
-#                 'address': request.data.get('address', '')
-#             }
-
-#             profile_serializer = ProfileSerializer(data=profile_data)
-#             profile_serializer.is_valid(raise_exception=True)
-#             mobile = profile_serializer.validated_data.get('mobile')
-
-#             user = User.objects.filter(mobile=mobile).first()
-#             if not user:
-#                 return Response({'error': 'User with this mobile number does not exist.'}, status=status.HTTP_400_BAD_REQUEST)
-
-#             profile, created = Profile.objects.get_or_create(user=user, defaults=profile_serializer.validated_data)
-
-#             booking_serializer = EventBookingSerializer(data=booking_data)
-#             booking_serializer.is_valid(raise_exception=True)
-
-#             ticket_price = booking_serializer.validated_data['ticket'].price
-#             ticket_quantity = booking_serializer.validated_data['ticket_quantity']
-#             ticket_amount = ticket_price * ticket_quantity
-
-#             reference_id = str(uuid.uuid4())
-
-#             try:
-#                 scheme = request.scheme
-#                 host = request.get_host()
-#                 full_url = f"{scheme}://{host}"
-#                 razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY, RAZORPAY_SECRET))
-#                 payment_details = razorpay_client.payment_link.create({
-#                                 "amount": ticket_amount * 100,
-#                                 "currency": "INR",
-#                                 "description": "For Hydrovibe 2024",
-#                                 "customer": {
-#                                     "name": profile_serializer.validated_data.get('name'),
-#                                     "contact": profile_serializer.validated_data.get('mobile')
-#                                 },
-#                                 "notify": {
-#                                     "sms": True
-#                                 },
-#                                 "reminder_enable": True,
-#                                 "notes": {
-#                                     "event_name": "Hydrovide 2024"
-#                                 },
-#                                 "reference_id": reference_id,
-#                                 "callback_url": f"{full_url}/event-registration/callback-for-razorpay",
-#                                 "callback_method": "get"
-#                                 })
-#             except razorpay.errors.RazorpayError as e:
-#                 print(f"Razorpay error: {e}")
-#                 return Response({'error': 'Failed to create payment link'}, status=status.HTTP_502_BAD_GATEWAY)
-
-#             event_booking = EventBooking(
-#                 event=booking_serializer.validated_data['event'],
-#                 user=user,
-#                 ticket=booking_serializer.validated_data['ticket'],
-#                 ticket_quantity=booking_serializer.validated_data['ticket_quantity'],
-#                 attending_time=booking_serializer.validated_data['attending_time'],
-#                 cab_facility_required=booking_serializer.validated_data.get('cab_facility_required', False),
-#                 location=booking_serializer.validated_data.get('location', ''),
-#                 address=booking_serializer.validated_data.get('address', ''),
-#                 formis_payment_id=reference_id,
-#                 vendor_payment_id=payment_details.get('id'),
-#                 payment_amount=ticket_amount,
-#                 payment_link=payment_details.get('short_url')
-#             )
-#             event_booking.save()
-
-#             return Response(
-#                 {
-#                     'id': reference_id,
-#                     'payment_link': payment_details.get('short_url')
-#                 },
-#                 status=status.HTTP_201_CREATED
-#             )
-
-#         except ValidationError as e:
-#             error_details = e.detail
-#             unique_error_messages = []
-
-#             if 'event' in error_details and 'unique' in error_details['event'][0].code:
-#                 unique_error_messages.append('An event booking with this event already exists.')
-            
-#             if 'ticket' in error_details and 'unique' in error_details['ticket'][0].code:
-#                 unique_error_messages.append('An event booking with this ticket already exists.')
-
-#             if unique_error_messages:
-#                 return Response({'error': unique_error_messages}, status=status.HTTP_400_BAD_REQUEST)
-
-#             return Response({'error': error_details}, status=status.HTTP_400_BAD_REQUEST)
-        
-
-#         except ObjectDoesNotExist as e:
-#             print(f"Object not found: {e}")
-#             return Response({'error': 'Event or ticket not found'}, status=status.HTTP_404_NOT_FOUND)
-
-#         except ValueError as e:
-#             print(f"Value error: {e}")
-#             return Response({'error': 'Invalid request'}, status=status.HTTP_400_BAD_REQUEST)
-
-#         except Exception as e:
-#             print(f"Unexpected error: {e}")
-#             return Response({'error': 'Something went wrong. Please try again later.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class CreateProfileAndBookingView(APIView):
     permission_classes = [IsAuthenticated]
@@ -371,6 +247,7 @@ class CreateProfileAndBookingView(APIView):
                 print("Validation Error:", e)
                 # Optionally, you can print the detailed error dictionary
                 print("Detailed Error:", e.detail)
+                return Response({'error': e.detail}, status=status.HTTP_207_MULTI_STATUS)
             print('Profile serializer done...')
 
             ticket_price = booking_serializer.validated_data['ticket'].price
