@@ -247,7 +247,7 @@ class CreateProfileAndBookingView(APIView):
                 print("Validation Error:", e)
                 # Optionally, you can print the detailed error dictionary
                 print("Detailed Error:", e.detail)
-                return Response({'error': e.detail}, status=status.HTTP_207_MULTI_STATUS)
+                return Response({'error_detail': e.detail, 'error_validation': e}, status=status.HTTP_207_MULTI_STATUS)
             print('Profile serializer done...')
 
             ticket_price = booking_serializer.validated_data['ticket'].price
