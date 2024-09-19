@@ -366,7 +366,7 @@ class CallbackForPaymentGateway(APIView):
 
                 print(razorpay_payment_status)
 
-            return redirect('https://www.google.com')
+            return redirect('http://65.0.176.89/hydrovibe2024/tickets')
         except ValueError as e:
             print(f"Value error: {e}")
             return Response({'error': 'Invalid request'}, status=status.HTTP_400_BAD_REQUEST)
