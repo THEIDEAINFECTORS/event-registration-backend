@@ -619,14 +619,46 @@ class UserEventBookingsView(APIView):
         try:
             user = request.user
 
-            event_bookings = EventBooking.objects.filter(user=user)
+            event_booking = EventBooking.objects.filter(user=user).first()
 
-            if not event_bookings.exists():
+            if not event_booking:
                 return Response({'message': 'No bookings found for this user.'}, status=status.HTTP_404_NOT_FOUND)
-
-            booking_serializer = EventBookingSerializer(event_bookings, many=True)
             
-            return Response(booking_serializer.data, status=status.HTTP_200_OK)
+            booking_serializer = EventBookingSerializer(event_booking)
+
+            booking_data = {
+                    'payment_completed': event_booking.payment_completed,
+                    'event_id': event_booking.event.id,
+                    'user': event_booking.user.mobile,
+                    'ticket': event_booking.ticket.name,
+                    'ticket_quantity': event_booking.ticket_quantity,
+                    'attending_time': event_booking.attending_time,
+                    'cab_facility_required': event_booking.cab_facility_required,
+                    'payment_completed': event_booking.payment_completed,
+                    'reference_id': event_booking.formis_payment_id,
+                    'payment_link': event_booking.payment_link
+                }
+
+            qr = qrcode.QRCode(
+                version=1,
+                error_correction=qrcode.constants.ERROR_CORRECT_L,
+                box_size=10,
+                border=4,
+            )
+            qr.add_data(booking_data)
+            qr.make(fit=True)
+
+            img = qr.make_image(fill='black', back_color='white')
+
+            buffer = BytesIO()
+            img.save(buffer, format="PNG")
+            buffer.seek(0)
+
+            img_str = base64.b64encode(buffer.getvalue()).decode('utf-8')
+
+
+            
+            return Response({'data': booking_data, 'qr': img_str}, status=status.HTTP_200_OK)
 
         except ObjectDoesNotExist as e:
             print(f"Object not found: {e}")
