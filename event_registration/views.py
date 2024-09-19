@@ -643,7 +643,8 @@ class UserEventBookingsView(APIView):
                     'cab_facility_required': event_booking.cab_facility_required,
                     'payment_completed': event_booking.payment_completed,
                     'reference_id': event_booking.formis_payment_id,
-                    'payment_link': event_booking.payment_link
+                    'payment_link': event_booking.payment_link,
+                    'name': request.user.profile.name
                 }
 
             qr = qrcode.QRCode(
