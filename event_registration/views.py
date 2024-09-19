@@ -23,6 +23,8 @@ from rest_framework_simplejwt.serializers import TokenVerifySerializer, TokenRef
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.exceptions import TokenError
+from rest_framework_simplejwt.tokens import UntypedToken
+from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 
 User = get_user_model()
 
@@ -562,7 +564,14 @@ class VerifyTokenView(APIView):
         
         try:
             serializer.is_valid(raise_exception=True)
-            return Response({'message': 'Token is valid'}, status=status.HTTP_200_OK)
+            token = request.data.get('token')
+
+            decoded_token = UntypedToken(token)
+            user_id = decoded_token['user_id']
+
+            # Fetch user from the database
+            user = User.objects.get(id=user_id)
+            return Response({'message': 'Token is valid', 'mobile': user.mobile}, status=status.HTTP_200_OK)
         
         except Exception as e:
             return Response({'error': 'Token is invalid or expired'}, status=status.HTTP_401_UNAUTHORIZED)
