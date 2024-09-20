@@ -357,7 +357,6 @@ class CallbackForPaymentGateway(APIView):
             captured = razorpay_payment_status.get('captured')
 
             if captured:
-                
                 event_booking.vendor_payment_id = razorpay_payment_id
                 event_booking.payment_completed = True
                 event_booking.payment_completed_at = datetime.datetime.fromtimestamp(razorpay_payment_status.get('created_at'))
@@ -366,7 +365,7 @@ class CallbackForPaymentGateway(APIView):
 
                 print(razorpay_payment_status)
 
-            return redirect('http://65.0.176.89/hydrovibe2024/tickets')
+            return redirect('https://heyformis.com/hydrovibe2024/tickets')
         except ValueError as e:
             print(f"Value error: {e}")
             return Response({'error': 'Invalid request'}, status=status.HTTP_400_BAD_REQUEST)
