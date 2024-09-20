@@ -126,8 +126,8 @@ class Profile(models.Model):
 class EventBooking(models.Model):
 
     ATTENDING_TIME = (
-        ('4PM-8PM', '4PM-8PM'),
-        ('8PM-12PM', '8PM-12PM')
+        ('5PM-7PM', '5PM-7PM'),
+        ('8:30PM-11:30PM', '8:30PM-11:30PM')
     )
 
     event = models.ForeignKey(Event, on_delete=models.CASCADE, null=False)
